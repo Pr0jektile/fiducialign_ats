@@ -1,0 +1,11 @@
+<div class="p-8">
+  <h1 class="text-2xl font-bold">Welcome to FiduciAlign</h1>
+  <p class="text-gray-600">Logged in as: <%= current_user.email %></p>
+  <p class="mt-4 text-sm bg-blue-100 text-blue-800 p-2 rounded inline-block">
+    Role: <%= current_user.role.capitalize %>
+  </p>
+
+  <div class="mt-8">
+    <%= button_to "Logout", logout_path, method: :delete, class: "text-red-600 hover:text-red-800 underline" %>
+  </div>
+</div>
