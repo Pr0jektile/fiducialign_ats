@@ -1,0 +1,22 @@
+name: Enforce Jira Branch Naming
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  verify-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Branch Name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Testing branch name: $BRANCH"
+          
+          if [[ "$BRANCH" != feat/ATS-* && "$BRANCH" != fix/ATS-* ]]; then
+            echo "❌ ERROR: Invalid branch name '$BRANCH'"
+            echo "Branch names must start with 'feat/ATS-' or 'fix/ATS-' to link with Jira."
+            exit 1
+          else
+            echo "✅ Branch name is valid and ready for Jira integration."
+          fi
