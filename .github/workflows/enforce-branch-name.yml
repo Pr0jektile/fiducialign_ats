@@ -2,21 +2,26 @@ name: Enforce Jira Branch Naming
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened]
 
 jobs:
-  verify-branch:
+  verify-and-close:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate Branch Name
+      - name: Validate Branch and Auto-Close
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          BRANCH: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
-          echo "Testing branch name: $BRANCH"
-          
           if [[ "$BRANCH" != feat/ATS-* && "$BRANCH" != fix/ATS-* ]]; then
-            echo "❌ ERROR: Invalid branch name '$BRANCH'"
-            echo "Branch names must start with 'feat/ATS-' or 'fix/ATS-' to link with Jira."
+            echo "❌ Invalid branch name: $BRANCH"
+          
+            # Use the GitHub CLI to comment and close the PR
+            gh pr comment "$PR_URL" --body "🚨 **Pull Request Automatically Closed** 🚨<br><br>Your branch name (\`$BRANCH\`) does not match our Jira tracking convention. To link this work to the Jira board, branch names must start with \`feat/ATS-\` or \`fix/ATS-\`.<br><br>Please rename your branch locally (\`git branch -m new-name\`), push the new branch, and open a new PR."
+          
+            gh pr close "$PR_URL"
             exit 1
           else
-            echo "✅ Branch name is valid and ready for Jira integration."
+            echo "✅ Branch name is valid."
           fi
